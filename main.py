@@ -1,10 +1,17 @@
-arr=[{"name":"tk","age":"34"},{"name":"sk","age":"24"}]
+from flask import Flask
+from database.db import initialize_db
+from flask_restful import Api
+from resources.routes import initialize_routes
 
-def filterArr(res):
-    print(res)
-    return {'name':res['name']}
+app = Flask(__name__)
+api = Api(app)
 
+app.config['MONGODB_SETTINGS'] = {
+    'host': 'mongodb://localhost/restdb'
+}
 
-result=list(map(filterArr,arr))
+initialize_db(app)
+initialize_routes(api)
 
-print(result)
+if __name__=='__main__':
+    app.run()
