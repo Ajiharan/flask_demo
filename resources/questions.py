@@ -1,15 +1,17 @@
 from flask import Response, request
 from database.models import Question
 from flask_restful import Resource
-from flask import Flask, request, Response,jsonify
+from flask import Flask, request, Response, jsonify
 from database.db import initialize_db
 from train_model.train import *
 from database.models import Question
 import json
 import pandas as pd
 import csv
+from flask_jwt_extended import jwt_required
 
 class QuestionsApi(Resource):
+    @jwt_required()
     def get(self):
         result = Question.objects().only('Question')
         lst = list(map(lambda res: {'Question': res['Question']}, result))
@@ -20,6 +22,7 @@ class QuestionsApi(Resource):
         train_question_model()
         return Response("model trained sucessfully", mimetype="application/json", status=200)
 
+    @jwt_required()
     def post(self):
         body = request.get_json()
         question, similarity, accuracy = input_question(body['question'])
@@ -27,15 +30,18 @@ class QuestionsApi(Resource):
 
 
 class QuestionApi(Resource):
+    @jwt_required()
     def put(self, id):
         body = request.get_json()
         Question.objects.get(id=id).update(**body)
         return '', 200
 
+    @jwt_required()
     def delete(self, id):
         movie = Question.objects.get(id=id).delete()
         return '', 200
 
+    @jwt_required()
     def get(self, id):
         movies = Question.objects.get(id=id).to_json()
         return Response(movies, mimetype="application/json", status=200)
